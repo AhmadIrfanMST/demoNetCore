@@ -11,6 +11,6 @@ namespace WebApplication3.Models
         }
         public DbSet<Category> categories { get; set; }
         public DbSet<Pie> pies { get; set; }
-        public DbSet<ApplicationUser> aspnetusers { get; set; }
+        public DbSet<  ApplicationUser> aspnetusers { get; set; }
     }
 }
