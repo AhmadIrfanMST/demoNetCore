@@ -128,11 +128,14 @@ namespace WebApplication3.Controllers
         {
             dynamic json = JsonConvert.DeserializeObject(entity.ToString());
             var user = await userManager.FindByIdAsync(json.userId.ToString());
-            if (await roleManager.RoleExistsAsync(json.roleName.ToString()))
+            if (user!= null && await roleManager.RoleExistsAsync(json.roleName.ToString()))
             {
                 await userManager.AddToRoleAsync(user, json.roleName.ToString());
+                return Ok(new Response { Status = "Success", Message = "Role Assigned Successfully" });
             }
-            return Ok(new Response { Status = "Success", Message = "Role Assigned Successfully" });
+            else
+                return Ok(new Response { Status = "Failed", Message = "Cannot assign role to the id you have given" });
+
 
         }
         [Authorize(Roles = UserRoles.Admin)]
@@ -145,6 +148,27 @@ namespace WebApplication3.Controllers
                 await roleManager.CreateAsync(new IdentityRole(json.roleName.ToString()));
             return Ok(new Response { Status = "Success", Message = "Role Created Successfully" });
         }
+
+        /*
+        public async Task<IActionResult> assignPermissionToRole([FromForm] AssignPermissionModel model)
+        {
+            var role = await roleManager.FindByIdAsync(model.roleId);
+            if (role != null && model.permissionIds.Count()>0)
+            {
+                //await roleManager.AddPermissionClaim(role, "Products");
+
+
+                var allClaims = await roleManager.GetClaimsAsync(role);
+                var allPermissions = Permissions.GeneratePermissionsForModule(module);// these are my permissions to assign
+                foreach (var permission in allPermissions)
+                {
+                    if (!allClaims.Any(a => a.Type == "Permission" && a.Value == permission))
+                    {
+                        await roleManager.AddClaimAsync(role, new Claim("Permission", permission));
+                    }
+                }
+            }
+        }*/
         
 
 

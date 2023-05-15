@@ -23,11 +23,6 @@ namespace WebApplication3.Permission
             }
             return MyPolicyProvider.GetPolicyAsync(policyName);
         }
-
-        //public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
-        //{
-        //    return MyPolicyProvider.GetPolicyAsync("");// GetDefaultPolicyAsync();
-        // }
         public Task<AuthorizationPolicy> GetFallbackPolicyAsync() => MyPolicyProvider.GetFallbackPolicyAsync();//MyPolicyProvider.GetDefaultPolicyAsync();
     }
 }

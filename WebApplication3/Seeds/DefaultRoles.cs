@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Data;
 using WebApplication3.Authentication;
-using WebApplication3.Models;
 
 namespace WebApplication3.Seeds
 {
@@ -9,6 +7,7 @@ namespace WebApplication3.Seeds
     {
         public static async Task SeedAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            await roleManager.CreateAsync(new IdentityRole(UserRoles.SuperAdmin.ToString()));
             await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin.ToString()));
             await roleManager.CreateAsync(new IdentityRole(UserRoles.User.ToString()));
         }

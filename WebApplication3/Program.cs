@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
 using System.Text;
@@ -67,6 +66,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 var app = builder.Build();
 app.UseStaticFiles();
 
+//For Seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -74,11 +74,22 @@ using (var scope = app.Services.CreateScope())
     var logger = loggerFactory.CreateLogger("app");
     try
     {
+        var dbContext = services.GetRequiredService<MyDbContext>();
+
+        // Seed the permissions
+        await PermissionSeeder.SeedPermissionsAsync(dbContext); // Add permissions in permissions table 
+
+
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await DefaultRoles.SeedAsync(userManager, roleManager);
         await DefaultUsers.SeedBasicUserAsync(userManager, roleManager);
         await DefaultUsers.SeedSuperAdminAsync(userManager, roleManager);
+
+        await DefaultRolePermissions.SeedRolePermissionsAsync(roleManager,UserRoles.SuperAdmin, dbContext);// Assign permissions to Role Super Admin
+        await DefaultRolePermissions.SeedRolePermissionsAsync(roleManager,UserRoles.Admin, dbContext);// Assign permissions to Role Admin
+        await DefaultRolePermissions.SeedRolePermissionsAsync(roleManager,UserRoles.User, dbContext);// Assign permissions to Role User
+
         logger.LogInformation("Finished Seeding Default Data");
         logger.LogInformation("Application Starting");
     }
@@ -97,6 +108,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 
 app.UseRouting();
+// Handling request response middleware
 app.Use(async (context, next) =>
 {
     await next();
