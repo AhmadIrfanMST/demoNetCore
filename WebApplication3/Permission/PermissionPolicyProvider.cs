@@ -5,12 +5,14 @@ namespace WebApplication3.Permission
 {
     internal class PermissionPolicyProvider : IAuthorizationPolicyProvider
     {
-        public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }
+        //fallback policy triggered when no authorize attribute is present neither on controller nor on an action
+        //default policy is triggered when there is an authorize attribute without a policy
+        public DefaultAuthorizationPolicyProvider MyPolicyProvider { get; }
         public PermissionPolicyProvider(IOptions<AuthorizationOptions> options)
         {
-            FallbackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
+            MyPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
         }
-        public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => FallbackPolicyProvider.GetDefaultPolicyAsync();
+        public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => MyPolicyProvider.GetDefaultPolicyAsync();
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
             if (policyName.StartsWith("Permission", StringComparison.OrdinalIgnoreCase))
@@ -19,13 +21,13 @@ namespace WebApplication3.Permission
                 policy.AddRequirements(new PermissionRequirement(policyName));
                 return Task.FromResult(policy.Build());
             }
-            return FallbackPolicyProvider.GetPolicyAsync(policyName);
+            return MyPolicyProvider.GetPolicyAsync(policyName);
         }
 
-        public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
-        {
-            return FallbackPolicyProvider.GetPolicyAsync("");// GetDefaultPolicyAsync();
-        }
-        //public Task<AuthorizationPolicy> GetFallbackPolicyAsync() => FallbackPolicyProvider.GetDefaultPolicyAsync();
+        //public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
+        //{
+        //    return MyPolicyProvider.GetPolicyAsync("");// GetDefaultPolicyAsync();
+        // }
+        public Task<AuthorizationPolicy> GetFallbackPolicyAsync() => MyPolicyProvider.GetFallbackPolicyAsync();//MyPolicyProvider.GetDefaultPolicyAsync();
     }
 }

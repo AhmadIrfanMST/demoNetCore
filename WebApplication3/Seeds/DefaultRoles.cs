@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Data;
 using WebApplication3.Authentication;
+using WebApplication3.Models;
 
 namespace WebApplication3.Seeds
 {

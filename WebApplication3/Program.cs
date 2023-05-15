@@ -18,18 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPieRepository, PieRepository>();
-
-
-//changes
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
         .AddEntityFrameworkStores<MyDbContext>()
 .AddDefaultTokenProviders();
-//changes
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddSwaggerGen();
 
 // Adding Authentication  
@@ -45,64 +37,26 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters()
     {
-        /* ValidateIssuer = true,
-         ValidateAudience = true,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         ValidIssuer = Configuration["Jwt:Issuer"],
-         ValidAudience = Configuration["Jwt:Audience"],
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))*/
-
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM"))
-
-        //ValidateIssuer = true,
-        //ValidateAudience = true,
-        //ValidAudience = "http://localhost:4200",//Configuration["JWT:ValidAudience"],
-        //ValidIssuer = "http://localhost:61955",//Configuration["JWT:ValidIssuer"],
-        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM"))//Configuration["JWT:Secret"]))
     };
-    /*options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = async (context) =>
-        {
-            Console.WriteLine("Printing in the delegate OnAuthFailed");
-        },
-        OnChallenge = async (context) =>
-        {
-            Console.WriteLine("Printing in the delegate OnChallenge");
-
-            // this is a default method
-            // the response statusCode and headers are set here
-            context.HandleResponse();
-
-            // AuthenticateFailure property contains 
-            // the details about why the authentication has failed
-            if (context.AuthenticateFailure != null)
-            {
-                context.Response.StatusCode = 401;
-
-                // we can write our own custom response content here
-                await context.HttpContext.Response.WriteAsync("Token Validation Has Failed. Request Access Denied");
-            }
-        }
-    };*/
-
 });
 
 //Adding Authorization 
 builder.Services.AddAuthorization(options =>
 {
+    //below fallback is equivalentr to applying authorize on controller side or on an action
+    //options.FallbackPolicy = new AuthorizationPolicyBuilder()// fallback is triggered when no authorize attribute is present. Authorize is not on controller nor on action
+    //.RequireAuthenticatedUser()// it will check if there is an identity cookie present
+    //.Build();
     options.AddPolicy("AdminAssignRolePolicy", policy =>
         policy.RequireClaim(Permissions.AssignRole).RequireRole(UserRoles.Admin));
-    //policy.RequireRole(UserRoles.Admin)
-    //     .RequireClaim(Permissions.AssignRole)); ; ;
-
 });
-
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 //here
 
 builder.Services.AddDbContext<MyDbContext>(options =>
@@ -112,30 +66,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 });
 var app = builder.Build();
 app.UseStaticFiles();
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
 
-//app.UseHttpsRedirection();
-
-//app.UseAuthorization();
-
-//app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");//conventional based routing
-
-//app.MapControllers();
-
-//app.Run();
-
-
-
-
-
-
-
-/*
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -155,11 +86,7 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogWarning(ex, "An error occurred seeding the DB");
     }
-}*/
-
-
-
-
+}
 
 if (app.Environment.IsDevelopment())
 {

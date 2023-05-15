@@ -16,22 +16,23 @@ namespace WebApplication3.Controllers
     [ApiController]
     public class AuthController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly UserManager<IdentityUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _configuration;
-        public AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             _configuration = configuration;
         }
-        
+        [AllowAnonymous]
+        //[Authorize("RequireAuthenticatedUser")]
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await userManager.FindByNameAsync(model.Username);
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            if (user != null && await userManager.CheckPasswordAsync(user, model.Password)) 
             {
                 var userRoles = await userManager.GetRolesAsync(user);
 
@@ -67,7 +68,7 @@ namespace WebApplication3.Controllers
             return StatusCode(StatusCodes.Status401Unauthorized, new Response { Status = "Error", Message = "Failed to Login" });
             //return Unauthorized();
         }
-
+        [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -89,7 +90,7 @@ namespace WebApplication3.Controllers
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
-
+        [AllowAnonymous]
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
