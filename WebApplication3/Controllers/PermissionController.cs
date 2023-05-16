@@ -17,29 +17,18 @@ namespace WebApplication3.Controllers
         {
             _roleManager = roleManager;
         }
-
+        [HttpGet]
+        [Route("get-role-permissions")]
         public async Task<ActionResult> Index(string roleId)
         {
-            var model = new PermissionViewModel();
-            var allPermissions = new List<RoleClaimsViewModel>();
-            allPermissions.GetPermissions(typeof(Permissions.Products), roleId);
             var role = await _roleManager.FindByIdAsync(roleId);
-            model.RoleId = roleId;
             var claims = await _roleManager.GetClaimsAsync(role);
-            var allClaimValues = allPermissions.Select(a => a.Value).ToList();
             var roleClaimValues = claims.Select(a => a.Value).ToList();
-            var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
-            foreach (var permission in allPermissions)
-            {
-                if (authorizedClaims.Any(a => a == permission.Value))
-                {
-                    permission.Selected = true;
-                }
-            }
-            model.RoleClaims = allPermissions;
-            return Ok(new Response { Status = "Success", Message = "Role Permissions", data = model });
+            return Ok(new Response { Status = "Success", Message = "Role Permissions", data = roleClaimValues });
             //return View(model);
         }
+        [HttpPost]
+        [Route("add-permissions-to-role")]
         public async Task<IActionResult> Update(PermissionViewModel model)
         {
             var role = await _roleManager.FindByIdAsync(model.RoleId);

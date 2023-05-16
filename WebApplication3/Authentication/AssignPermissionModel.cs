@@ -8,6 +8,6 @@ namespace WebApplication3.Authentication
         public string roleId { get; set; }
 
         [Required(ErrorMessage = "Permissions are Required")]
-        public List<string> permissionIds { get; set; }
+        public List<string> permissions { get; set; }
     }
 }

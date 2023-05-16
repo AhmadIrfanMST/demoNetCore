@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Data;
+using System.Text.Json;
 using WebApplication3.Authentication;
 using WebApplication3.ViewModels;
 
@@ -59,6 +61,25 @@ namespace WebApplication3.Controllers
             await _signInManager.RefreshSignInAsync(currentUser);
             await Seeds.DefaultUsers.SeedSuperAdminAsync(_userManager, _roleManager);
             return RedirectToAction("Index", new { userId = id });
+        }
+
+
+        [Authorize(Policy = "AdminAssignRolePolicy")]//[Authorize(Roles = UserRoles.Admin)]
+        [HttpPost]
+        [Route("assign-role-to-user")]
+        public async Task<IActionResult> AssignRoleToUser([FromBody] JsonElement entity)
+        {
+            dynamic json = JsonConvert.DeserializeObject(entity.ToString());
+            var user = await _userManager.FindByIdAsync(json.userId.ToString());
+            if (user != null && await _roleManager.RoleExistsAsync(json.roleName.ToString()))
+            {
+                await _userManager.AddToRoleAsync(user, json.roleName.ToString());
+                return Ok(new Response { Status = "Success", Message = "Role Assigned Successfully" });
+            }
+            else
+                return Ok(new Response { Status = "Failed", Message = "Cannot assign role to the id you have given" });
+
+
         }
     }
 }

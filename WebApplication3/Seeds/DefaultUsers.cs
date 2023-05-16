@@ -46,7 +46,7 @@ namespace WebApplication3.Seeds
                     await userManager.AddToRoleAsync((ApplicationUser)defaultUser, UserRoles.User.ToString());
                     await userManager.AddToRoleAsync((ApplicationUser)defaultUser, UserRoles.Admin.ToString());
                 }
-                await roleManager.SeedClaimsForSuperAdmin();
+                //await roleManager.SeedClaimsForSuperAdmin();
             }
         }
         private async static Task SeedClaimsForSuperAdmin(this RoleManager<IdentityRole> roleManager)

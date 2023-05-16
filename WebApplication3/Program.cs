@@ -14,13 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IPieRepository, PieRepository>();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
         .AddEntityFrameworkStores<MyDbContext>()
 .AddDefaultTokenProviders();
-builder.Services.AddScoped<UserManager<IdentityUser>>();
+builder.Services.AddControllers();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IPieRepository, PieRepository>();
+
 builder.Services.AddSwaggerGen();
 
 // Adding Authentication  
